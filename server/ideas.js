@@ -36,6 +36,37 @@ function getIdeas(req, res, next) {
         })
 }
 
+function getIdea(req, res, next) {
+    if(!req.params.id) {
+        res.status(400).json({ "errors": ["ID Not Valid."]})
+    }
+    db.one('SELECT * from IDEAS WHERE id=$1', parseInt(req.params.id))
+    .then((idea) => {
+        res.json({
+            "idea": { 
+                    "title": idea.title, 
+                    "description": idea.description,
+                    "created": idea.created,
+                    "id": idea.id
+                }
+        })
+    })
+    .catch((err) => {
+        if(err.code !== undefined) {
+            if((err.code == '23503') || (err.code == 0)) {
+                res.status(404).json({
+                    errors: ["Idea provided does not exist."]
+                })
+            } else {
+                logger.error("Unhandled Postgres Error Code: "+err.code)
+                return next(err)
+            }
+        } else {
+            return next(err)
+        }
+    })
+}
+
 function addIdea(req, res, next) {
     let errors = []
     if(!req.body.title) {
@@ -130,6 +161,7 @@ function deleteIdea(req, res, next) {
 
 module.exports = {
     getIdeas: getIdeas,
+    getIdea: getIdea,
     addIdea: addIdea,
     editIdea: editIdea,
     deleteIdea: deleteIdea

@@ -13,6 +13,7 @@ const app = express()
 app.use(cors())
 
 app.get('/api/v1/ideas', ideas.getIdeas)
+app.get('/api/v1/ideas/:id', ideas.getIdea)
 app.post('/api/v1/ideas', jsonParser, ideas.addIdea)
 app.patch('/api/v1/ideas/:id', jsonParser, ideas.editIdea)
 app.delete('/api/v1/ideas/:id', ideas.deleteIdea)
