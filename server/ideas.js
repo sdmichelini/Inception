@@ -40,16 +40,34 @@ function getIdea(req, res, next) {
     if(!req.params.id) {
         res.status(400).json({ "errors": ["ID Not Valid."]})
     }
-    db.one('SELECT * from IDEAS WHERE id=$1', parseInt(req.params.id))
-    .then((idea) => {
-        res.json({
-            "idea": { 
-                    "title": idea.title, 
-                    "description": idea.description,
-                    "created": idea.created,
-                    "id": idea.id
-                }
-        })
+    let ideaResult = undefined
+    db.task(t => {
+        return t.one('SELECT * from IDEAS WHERE id=$1', parseInt(req.params.id))
+            .then(idea => {
+                ideaResult = idea
+                return t.any('SELECT ideas.title AS title, ideas.id AS id FROM ideas INNER JOIN linked_ideas ON (linked_ideas.idea2 = ideas.id) WHERE (linked_ideas.idea1 = $1) '+
+                    'UNION ALL '+
+                    'SELECT ideas.title AS title, ideas.id AS id FROM ideas INNER JOIN linked_ideas ON (linked_ideas.idea1 = ideas.id) WHERE (linked_ideas.idea2 = $1)',
+                    parseInt(req.params.id))
+            })
+    })
+    .then(linkedIdeas => {
+        if(!ideaResult) {
+            res.status(500).json({errors:["Could not fetch from DB."]})
+        } else {
+            linkedIdeas = linkedIdeas.map(linkedIdea => {
+                return {"id": linkedIdea.id, "title": linkedIdea.title}
+            })
+            res.json({
+                "idea": { 
+                        "title": ideaResult.title, 
+                        "description": ideaResult.description,
+                        "created": ideaResult.created,
+                        "id": ideaResult.id,
+                        "linkedIdeas":linkedIdeas
+                    }
+            })
+        }
     })
     .catch((err) => {
         if(err.code !== undefined) {
