@@ -16,8 +16,36 @@ const store = new Vuex.Store({
             commit('CLEAR_ERRORS_LIST')
         })
         .catch(err => {
-            if (err.response.data.errors) {
-                commit('SET_ERRORS_LIST', { list: err.response.data.errors })
+            if (err.response) {
+                if (err.response.data.errors) {
+                    commit('SET_ERRORS_LIST', { list: err.response.data.errors })
+                } else {
+                    commit('SET_ERRORS_LIST', { list: [ err.message ] })
+                }
+            } else {
+                console.error(err)
+                commit('SET_ERRORS_LIST', { list: [ err.message ] })
+            }
+        })
+    },
+    CREATE_IDEA ({ commit }, idea) {
+        axios.post('http://localhost:3000/api/v1/ideas', {
+            title: idea.title,
+            description: idea.description
+        }).then(response => {
+            commit('ADD_IDEA', { idea: { title: idea.title, description: idea.description } })
+            commit('CLEAR_ERRORS_LIST')
+        })
+        .catch(err => {
+            if (err.response) {
+                if (err.response.data.errors) {
+                    commit('SET_ERRORS_LIST', { list: err.response.data.errors })
+                } else {
+                    commit('SET_ERRORS_LIST', { list: [ err.message ] })
+                }
+            } else {
+                console.error(err)
+                commit('SET_ERRORS_LIST', { list: [ err.message ] })
             }
         })
     }
@@ -31,6 +59,9 @@ const store = new Vuex.Store({
     },
     CLEAR_ERRORS_LIST: (state) => {
         state.errors = []
+    },
+    ADD_IDEA: (state, { idea }) => {
+        state.ideas = state.ideas.concat(idea)
     }
   },
   getters: {

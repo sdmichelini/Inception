@@ -3,17 +3,6 @@
 const db = require('./db').db
 const logger = require('./utils').logger
 
-function makeIdea(title, description, tags, linkedIdeas, created) {
-    return { 
-        "title": title, 
-        "description": description,
-        "tags": tags,
-        "linkedIdeas": linkedIdeas,
-        "created": created,
-        "id": String(getRandomInt(65000))
-    }
-}
-
 function getIdeas(req, res, next) {
     db.any('SELECT * from IDEAS ORDER BY created DESC')
         .then((dbIdeas) => {
@@ -129,6 +118,8 @@ function editIdea(req, res, next) {
         res.status(400).json({ "errors": ["Can't Link the Same Idea to Itself."]})
         return
     }
+    // Always insert the lowest ID first, that way whenever two IDs are linked 
+    // they always appear in the same order in database
     let ids = {
         id1: Math.min(id1, id2),
         id2: Math.max(id1,id2)
