@@ -5,6 +5,10 @@ import App from './App'
 import router from './router'
 import store from './store'
 
+import Errors from '@/components/Errors'
+
+Vue.component('errors', Errors)
+
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
@@ -13,5 +17,8 @@ new Vue({
   router,
   store,
   template: '<App/>',
-  components: { App }
+  components: {
+    App,
+    Errors
+   }
 })

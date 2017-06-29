@@ -1,16 +1,7 @@
 <template>
     <div class="container">
-        <p class="title">Ideas</p>
-        <div v-if="errors.length > 0">
-            <p class="subtitle">Errors</p>
-            <div class="tile is-ancestor">
-                <div class="tile is-vertical is-parent" v-for="error in errors">
-                    <div class="tile is-child notification is-danger">
-                        {{ error }}
-                    </div>
-                </div>
-            </div>
-        </div>
+        <p class="title">Inception</p>
+        <errors></errors>
         <div class="tile is-ancestor">
             <div class="tile is-vertical">
                 <div class="tile" v-for="row in getRows()">
@@ -65,8 +56,7 @@ export default {
         this.$store.dispatch('LOAD_IDEAS_LIST')
     },
     computed: mapState([
-        'ideas',
-        'errors'
+        'ideas'
     ])
 }
 </script>
