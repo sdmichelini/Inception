@@ -4,7 +4,8 @@ const db = require('./db').db
 const logger = require('./utils').logger
 
 function getIdeas(req, res, next) {
-    db.any('SELECT * from IDEAS ORDER BY created DESC')
+    if(!req.query.title) {
+        db.any('SELECT * from IDEAS ORDER BY created DESC')
         .then((dbIdeas) => {
             const ideas = dbIdeas.map((idea) => {
                 return { 
@@ -23,6 +24,34 @@ function getIdeas(req, res, next) {
         .catch((err) => {
             return next(err)
         })
+    } else {
+        let title = req.query.title.replace(/(<([^>]+)>)/ig, '')
+        if(title.length < 3) {
+            res.status(400).json({ "errors": ["Title search must be at least three characters"]})
+            return
+        } 
+        db.any('SELECT * from IDEAS WHERE lower(title) LIKE $1', '%'+String(title)+'%')
+        .then((dbIdeas) => {
+            const ideas = dbIdeas.map((idea) => {
+                return { 
+                    "title": idea.title, 
+                    "description": idea.description,
+                    "created": idea.created,
+                    "id": idea.id
+                }
+            })
+            res.json({
+                "ideas": ideas,
+                "count": ideas.length,
+                "total": ideas.length
+            })
+        })
+        .catch((err) => {
+            return next(err)
+        })
+
+    }
+    
 }
 
 function getIdea(req, res, next) {
