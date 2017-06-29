@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 Vue.use(Vuex)
+
 const store = new Vuex.Store({
   state: {
     ideas: [],
@@ -48,6 +49,24 @@ const store = new Vuex.Store({
                 commit('SET_ERRORS_LIST', { list: [ err.message ] })
             }
         })
+    },
+    LOAD_IDEA ({ commit }, id) {
+        commit('CLEAR_CURRENT_IDEA')
+        axios.get('http://localhost:3000/api/v1/ideas/' + String(id)).then(response => {
+            commit('SET_CURRENT_IDEA', { idea: response.data })
+        })
+        .catch(err => {
+            if (err.response) {
+                if (err.response.data.errors) {
+                    commit('SET_ERRORS_LIST', { list: err.response.data.errors })
+                } else {
+                    commit('SET_ERRORS_LIST', { list: [ err.message ] })
+                }
+            } else {
+                console.error(err)
+                commit('SET_ERRORS_LIST', { list: [ err.message ] })
+            }
+        })
     }
   },
   mutations: {
@@ -62,6 +81,12 @@ const store = new Vuex.Store({
     },
     ADD_IDEA: (state, { idea }) => {
         state.ideas = state.ideas.concat(idea)
+    },
+    CLEAR_CURRENT_IDEA: (state) => {
+        state.currentIdea = undefined
+    },
+    SET_CURRENT_IDEA: (state, { idea }) => {
+        state.currentIdea = idea.idea
     }
   },
   getters: {

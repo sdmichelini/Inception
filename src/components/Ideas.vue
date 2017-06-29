@@ -6,12 +6,12 @@
             <div class="tile is-vertical">
                 <div class="tile" v-for="row in getRows()">
                     <div class="tile is-parent is-3" v-for="idea in row">
-                        <a class="tile is-child is-info box">
+                        <router-link class="tile is-child is-info box" :to="'/ideas/'+String(idea.id)">
                             <p class="subtitle">{{ idea.title }}</p>
                             <p class="content">
                                 {{ idea.description }}
                             </p>
-                        </a>
+                        </router-link>
                     </div>
                 </div>
                 <div class="tile is-2 is-parent">
